@@ -1,0 +1,1158 @@
+openapi: 3.0.0
+info:
+  title: Task Manager API
+  description: API for a Trello-like task management system with Kanban boards
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://{serviceHost}/{basePath}
+    description: hosted
+    variables:
+      basePath:
+        default: api/core-back-end/v1
+      serviceHost:
+        default: localhost:80
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Authorization
+    description: Authentication and token management
+  - name: Members
+    description: User management and member operations
+  - name: Boards
+    description: Board management
+  - name: Lists
+    description: List management within boards
+  - name: Cards
+    description: Card management within lists
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authorization
+      summary: Register a new user
+      description: Create a new member account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/RegisterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: User already exists
+                statusCode: 409
+
+  /auth/login:
+    post:
+      tags:
+        - Authorization
+      summary: Login user
+      description: Authenticate user and return JWT tokens
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authorization
+      summary: Refresh access token
+      description: Generate new access token using refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/TokenRefreshResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /members/me:
+    get:
+      tags:
+        - Members
+      summary: Get current user info
+      description: Retrieve information about the authenticated user
+      responses:
+        '200':
+          $ref: '#/components/responses/MemberResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags:
+        - Members
+      summary: Update current user info
+      description: Update authenticated user's profile information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMemberRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/MemberResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Username or email already taken
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Username or email already taken
+                statusCode: 409
+
+  /members/boards/{idBoard}/join:
+    post:
+      tags:
+        - Members
+      summary: Join a board
+      description: Join an existing board using board ID and password
+      parameters:
+        - name: idBoard
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Board unique identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinBoardRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/JoinBoardResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Invalid board password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Invalid board password
+                statusCode: 403
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Already a member of this board
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Already a member of this board
+                statusCode: 409
+
+  /members/boards/{idBoard}/star:
+    post:
+      tags:
+        - Members
+      summary: Star a board
+      description: Add a star to a board for quick access
+      parameters:
+        - name: idBoard
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/StarBoardResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Members
+      summary: Unstar a board
+      description: Remove star from a board
+      parameters:
+        - name: idBoard
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/UnstarBoardResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /boards:
+    get:
+      tags:
+        - Boards
+      summary: Get all boards of current member
+      description: Retrieve all boards the authenticated user is a member of
+      parameters:
+        - name: starred
+          in: query
+          schema:
+            type: boolean
+          description: Filter by starred boards only
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          $ref: '#/components/responses/BoardsListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Boards
+      summary: Create a new board
+      description: Create a new board with name and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBoardRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/BoardResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /boards/{idBoard}:
+    get:
+      tags:
+        - Boards
+      summary: Get board with lists
+      description: Retrieve detailed information about a board including all its lists
+      parameters:
+        - name: idBoard
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/BoardWithDetailsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Boards
+      summary: Update board
+      description: Update board information
+      parameters:
+        - name: idBoard
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBoardRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/BoardResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Boards
+      summary: Delete board
+      description: Permanently delete a board and all its lists and cards
+      parameters:
+        - name: idBoard
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Board deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /boards/{idBoard}/members/{idMember}:
+    delete:
+      tags:
+        - Boards
+      summary: Remove member from board (or leave from board if not an owner)
+      description: Remove a member from the board (requires board owner permissions)
+      parameters:
+        - name: idBoard
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: idMember
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: removed successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /lists:
+    post:
+      tags:
+        - Lists
+      summary: Create a new list
+      description: Create a new list in a board with fractional indexing for position
+      parameters:
+        - name: idBoard
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateListRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/ListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Board not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Board not found
+                statusCode: 404
+
+  /lists/{idList}:
+    get:
+      tags:
+        - Lists
+      summary: Get list with cards
+      description: Retrieve a list with all its cards
+      parameters:
+        - name: idList
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/ListWithCardsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Lists
+      summary: Update list
+      description: Update list properties
+      parameters:
+        - name: idList
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateListRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/ListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Lists
+      summary: Delete list
+      description: Permanently delete a list and all its cards
+      parameters:
+        - name: idList
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /cards:
+    post:
+      tags:
+        - Cards
+      summary: Create a new card
+      description: Create a new card in a list
+      parameters:
+        - name: idList
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCardRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/CardResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: List not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: List not found
+                statusCode: 404
+
+  /cards/{idCard}:
+    get:
+      tags:
+        - Cards
+      summary: Get card with full info
+      description: Retrieve detailed information about a card
+      parameters:
+        - name: idCard
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          $ref: '#/components/responses/CardResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - Cards
+      summary: Update card
+      description: Update card properties, including moving to different list
+      parameters:
+        - name: idCard
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCardRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Cards
+      summary: Delete card
+      description: Permanently delete a card
+      parameters:
+        - name: idCard
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: "deleted successfully"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT authentication token
+
+  schemas:
+    Member:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        username:
+          type: string
+          example: johndoe
+        fullName:
+          type: string
+          example: John Doe
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Board:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174001
+        name:
+          type: string
+          example: My Project Board
+        description:
+          type: string
+          example: Board for managing project tasks
+        idMemberCreator:
+          type: string
+          format: uuid
+          description: ID of the board creator
+        starred:
+          type: boolean
+          description: Whether the current user has starred this board
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    BoardSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        starred:
+          type: boolean
+        memberCount:
+          type: integer
+          description: Number of members in the board
+        updatedAt:
+          type: string
+          format: date-time
+
+    List:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174002
+        name:
+          type: string
+          example: To Do
+        idBoard:
+          type: string
+          format: uuid
+        position:
+          type: number
+          format: float
+          description: Position for ordering lists
+          example: 1.0
+        archived:
+          type: boolean
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Card:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174003
+        title:
+          type: string
+          example: Implement user authentication
+        description:
+          type: string
+          example: Add JWT-based authentication system
+        idList:
+          type: string
+          format: uuid
+        position:
+          type: number
+          format: float
+          description: Position for ordering cards within list
+          example: 1.25
+        archived:
+          type: boolean
+          default: false
+        createdBy:
+          type: string
+          format: uuid
+          description: ID of the member who created the card
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      required:
+        - error
+        - statusCode
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: Invalid request parameters
+        statusCode:
+          type: integer
+          description: HTTP status code
+          example: 400
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties: true
+
+    # Request schemas
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - username
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: SecurePass123!
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          example: johndoe
+        fullName:
+          type: string
+          maxLength: 100
+          example: John Doe
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: SecurePass123!
+
+    TokenRefreshRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: Valid refresh token
+
+    UpdateMemberRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+        fullName:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: New password (optional)
+
+    JoinBoardRequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+          description: Board password
+
+    CreateBoardRequest:
+      type: object
+      required:
+        - name
+        - password
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: My Project Board
+        description:
+          type: string
+          maxLength: 500
+          example: Board for managing project tasks
+        password:
+          type: string
+          minLength: 4
+          description: Password required to join the board
+
+    UpdateBoardRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        password:
+          type: string
+          minLength: 4
+          description: Update board password
+
+    CreateListRequest:
+      type: object
+      required:
+        - name
+        - idBoard
+        - position
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: To Do
+        position:
+          type: number
+          format: float
+          description: Position for ordering lists
+          example: 1.0
+
+    UpdateListRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        position:
+          type: number
+          format: float
+          description: New position for ordering
+        archived:
+          type: boolean
+          description: Archive/unarchive the list
+
+    CreateCardRequest:
+      type: object
+      required:
+        - title
+        - idList
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: Implement user authentication
+        description:
+          type: string
+          maxLength: 2000
+          example: Add JWT-based authentication system
+        position:
+          type: number
+          format: float
+          description: Position for ordering (auto-generated if not provided)
+          example: 1.25
+
+    UpdateCardRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        idList:
+          type: string
+          format: uuid
+          description: Move card to different list
+        position:
+          type: number
+          format: float
+          description: New position for ordering
+        archived:
+          type: boolean
+          description: Archive/unarchive the card
+
+  responses:
+    BadRequest:
+      description: Bad request - Invalid input parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Invalid request parameters
+            statusCode: 400
+
+    Unauthorized:
+      description: Unauthorized - Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Authentication required
+            statusCode: 401
+
+    Forbidden:
+      description: Forbidden - User doesn't have permission
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: You don't have permission to perform this action
+            statusCode: 403
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Resource not found
+            statusCode: 404
+
+    # Success responses
+    RegisterResponse:
+      description: User registered successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Member'
+
+    LoginResponse:
+      description: Login successful
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              accessToken:
+                type: string
+                description: JWT access token
+              refreshToken:
+                type: string
+                description: JWT refresh token
+              expiresIn:
+                type: integer
+                description: Access token expiration time in seconds
+                example: 3600
+              user:
+                $ref: '#/components/schemas/Member'
+
+    TokenRefreshResponse:
+      description: Token refreshed successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              accessToken:
+                type: string
+              expiresIn:
+                type: integer
+                example: 3600
+
+    MemberResponse:
+      description: User info retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Member'
+
+    JoinBoardResponse:
+      description: Successfully joined the board
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              board:
+                $ref: '#/components/schemas/Board'
+
+    StarBoardResponse:
+      description: Board starred successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Board starred successfully
+              starred:
+                type: boolean
+                example: true
+
+    UnstarBoardResponse:
+      description: Board unstarred successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Board unstarred successfully
+              starred:
+                type: boolean
+                example: false
+
+    BoardsListResponse:
+      description: Boards retrieved successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              boards:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BoardSummary'
+              total:
+                type: integer
+              limit:
+                type: integer
+              offset:
+                type: integer
+
+    BoardResponse:
+      description: Board created/updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Board'
+
+    BoardWithDetailsResponse:
+      description: Board retrieved successfully
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Board'
+              - type: object
+                properties:
+                  lists:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/List'
+                  members:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Member'
+
+    ListResponse:
+      description: List created/updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/List'
+
+    ListWithCardsResponse:
+      description: List retrieved successfully
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/List'
+              - type: object
+                properties:
+                  cards:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Card'
+
+    CardResponse:
+      description: Card created/updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Card'
