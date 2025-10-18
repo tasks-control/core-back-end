@@ -1,0 +1,52 @@
+package config
+
+import (
+	"flag"
+	"fmt"
+	"os"
+
+	"github.com/go-playground/validator/v10"
+
+	"github.com/tasks-control/core-back-end/pkg/utils"
+	yaml "gopkg.in/yaml.v3"
+)
+
+type Config struct {
+	ServerPort string `validate:"required" yaml:"serverPort"`
+}
+
+func GetConfig() (cfg *Config) {
+	log := utils.Logger()
+	configPath := flag.String("c", "./cmd/core-back/config.yaml", "path to config")
+	flag.Parse()
+
+	cfg = &Config{}
+
+	err := read(*configPath, cfg)
+	if err != nil {
+		log.WithError(err).Fatal("can't read config")
+	}
+
+	v := validator.New()
+
+	err = v.Struct(cfg)
+	if err != nil {
+		log.WithError(err).Fatal("can't validate config")
+	}
+
+	return cfg
+}
+
+func read(path string, cfg interface{}) error {
+	data, err := os.ReadFile(path) //nolint:gosec // Config file path is controlled by application
+	if err != nil {
+		return fmt.Errorf("cant read config file: %s", err.Error())
+	}
+
+	err = yaml.Unmarshal(data, cfg)
+	if err != nil {
+		return fmt.Errorf("cant parse config: %s", err.Error())
+	}
+
+	return nil
+}

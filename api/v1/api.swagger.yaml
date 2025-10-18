@@ -19,6 +19,8 @@ security:
   - BearerAuth: []
 
 tags:
+  - name: Healthcheck
+    description: Health check
   - name: Authorization
     description: Authentication and token management
   - name: Members
@@ -31,13 +33,22 @@ tags:
     description: Card management within lists
 
 paths:
+  /alive:
+    get:
+      summary: health check
+      tags:
+        - Healthcheck
+      responses:
+        200:
+          description: success
+
   /auth/register:
     post:
       tags:
         - Authorization
       summary: Register a new user
       description: Create a new member account
-      security: []
+      security: [ ]
       requestBody:
         required: true
         content:
@@ -65,7 +76,7 @@ paths:
         - Authorization
       summary: Login user
       description: Authenticate user and return JWT tokens
-      security: []
+      security: [ ]
       requestBody:
         required: true
         content:
@@ -86,7 +97,7 @@ paths:
         - Authorization
       summary: Refresh access token
       description: Generate new access token using refresh token
-      security: []
+      security: [ ]
       requestBody:
         required: true
         content:
