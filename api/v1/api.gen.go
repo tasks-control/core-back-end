@@ -438,6 +438,9 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// GetAlive request
+	GetAlive(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// PostAuthLoginWithBody request with any body
 	PostAuthLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -525,6 +528,18 @@ type ClientInterface interface {
 	PutMembersMeWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	PutMembersMe(ctx context.Context, body PutMembersMeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) GetAlive(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAliveRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) PostAuthLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -921,6 +936,33 @@ func (c *Client) PutMembersMe(ctx context.Context, body PutMembersMeJSONRequestB
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewGetAliveRequest generates requests for GetAlive
+func NewGetAliveRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/alive")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
 }
 
 // NewPostAuthLoginRequest calls the generic PostAuthLogin builder with application/json body
@@ -1891,6 +1933,9 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// GetAliveWithResponse request
+	GetAliveWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetAliveResponse, error)
+
 	// PostAuthLoginWithBodyWithResponse request with any body
 	PostAuthLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAuthLoginResponse, error)
 
@@ -1978,6 +2023,27 @@ type ClientWithResponsesInterface interface {
 	PutMembersMeWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutMembersMeResponse, error)
 
 	PutMembersMeWithResponse(ctx context.Context, body PutMembersMeJSONRequestBody, reqEditors ...RequestEditorFn) (*PutMembersMeResponse, error)
+}
+
+type GetAliveResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAliveResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAliveResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type PostAuthLoginResponse struct {
@@ -2522,6 +2588,15 @@ func (r PutMembersMeResponse) StatusCode() int {
 	return 0
 }
 
+// GetAliveWithResponse request returning *GetAliveResponse
+func (c *ClientWithResponses) GetAliveWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetAliveResponse, error) {
+	rsp, err := c.GetAlive(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAliveResponse(rsp)
+}
+
 // PostAuthLoginWithBodyWithResponse request with arbitrary body returning *PostAuthLoginResponse
 func (c *ClientWithResponses) PostAuthLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAuthLoginResponse, error) {
 	rsp, err := c.PostAuthLoginWithBody(ctx, contentType, body, reqEditors...)
@@ -2806,6 +2881,22 @@ func (c *ClientWithResponses) PutMembersMeWithResponse(ctx context.Context, body
 		return nil, err
 	}
 	return ParsePutMembersMeResponse(rsp)
+}
+
+// ParseGetAliveResponse parses an HTTP response from a GetAliveWithResponse call
+func ParseGetAliveResponse(rsp *http.Response) (*GetAliveResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAliveResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
 }
 
 // ParsePostAuthLoginResponse parses an HTTP response from a PostAuthLoginWithResponse call
@@ -3788,6 +3879,9 @@ func ParsePutMembersMeResponse(rsp *http.Response) (*PutMembersMeResponse, error
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// health check
+	// (GET /alive)
+	GetAlive(w http.ResponseWriter, r *http.Request)
 	// Login user
 	// (POST /auth/login)
 	PostAuthLogin(w http.ResponseWriter, r *http.Request)
@@ -3859,6 +3953,12 @@ type ServerInterface interface {
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
+
+// health check
+// (GET /alive)
+func (_ Unimplemented) GetAlive(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
 
 // Login user
 // (POST /auth/login)
@@ -4000,6 +4100,23 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// GetAlive operation middleware
+func (siw *ServerInterfaceWrapper) GetAlive(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetAlive(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
 
 // PostAuthLogin operation middleware
 func (siw *ServerInterfaceWrapper) PostAuthLogin(w http.ResponseWriter, r *http.Request) {
@@ -4703,6 +4820,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/alive", wrapper.GetAlive)
+	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/auth/login", wrapper.PostAuthLogin)
 	})
