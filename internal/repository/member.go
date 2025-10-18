@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/tasks-control/core-back-end/internal/models"
 )
@@ -34,7 +35,7 @@ func (r *repository) GetMemberByEmail(ctx context.Context, email string) (*model
 		WHERE email = $1
 	`
 	err := r.conn.GetContext(ctx, &member, query, email)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -52,7 +53,7 @@ func (r *repository) GetMemberByID(ctx context.Context, id uuid.UUID) (*models.M
 		WHERE id = $1
 	`
 	err := r.conn.GetContext(ctx, &member, query, id)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -70,7 +71,7 @@ func (r *repository) GetMemberByUsername(ctx context.Context, username string) (
 		WHERE username = $1
 	`
 	err := r.conn.GetContext(ctx, &member, query, username)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {

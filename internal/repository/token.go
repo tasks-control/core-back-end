@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/tasks-control/core-back-end/internal/models"
 )
@@ -33,7 +34,7 @@ func (r *repository) GetRefreshTokenByHash(ctx context.Context, tokenHash string
 		WHERE token_hash = $1 AND revoked = false AND expires_at > NOW()
 	`
 	err := r.conn.GetContext(ctx, &token, query, tokenHash)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
