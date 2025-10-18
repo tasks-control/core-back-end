@@ -16,6 +16,13 @@ import (
 type Config struct {
 	ServerPort string            `validate:"required" yaml:"serverPort"`
 	Database   repository.Config `validate:"required" yaml:"database"`
+	JWT        JWTConfig         `validate:"required" yaml:"jwt"`
+}
+
+type JWTConfig struct {
+	SecretEnv            string `validate:"required" yaml:"secretEnv"`
+	AccessTokenDuration  int    `validate:"required,min=60" yaml:"accessTokenDuration"`    // seconds
+	RefreshTokenDuration int    `validate:"required,min=3600" yaml:"refreshTokenDuration"` // seconds
 }
 
 func GetConfig() (cfg *Config) {

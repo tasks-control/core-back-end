@@ -6,3 +6,8 @@ database:
   dbNameEnv: "DB_NAME"
   dbHostEnv: "DB_HOST"
   dbPortEnv: "DB_PORT"
+
+jwt:
+  secretEnv: "JWT_SECRET"
+  accessTokenDuration: 3600      # 1 hour in seconds
+  refreshTokenDuration: 604800   # 7 days in seconds

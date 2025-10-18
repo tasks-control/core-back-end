@@ -26,7 +26,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	svc := service.New(repo)
+	svc, err := service.New(repo, cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	h := handler.NewHandler(svc)
 
 	server.NewServer(h).Run(cfg.ServerPort)

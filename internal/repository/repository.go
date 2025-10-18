@@ -1,13 +1,15 @@
 package repository
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"os"
 
-	"database/sql"
-
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/tasks-control/core-back-end/internal/models"
 )
 
 const maxOpenConns = 10
@@ -21,6 +23,24 @@ type Config struct {
 }
 
 type Repository interface {
+	MemberRepository
+	TokenRepository
+}
+
+type MemberRepository interface {
+	CreateMember(ctx context.Context, member *models.Member) error
+	GetMemberByEmail(ctx context.Context, email string) (*models.Member, error)
+	GetMemberByID(ctx context.Context, id uuid.UUID) (*models.Member, error)
+	GetMemberByUsername(ctx context.Context, username string) (*models.Member, error)
+	UpdateMember(ctx context.Context, member *models.Member) error
+}
+
+type TokenRepository interface {
+	CreateRefreshToken(ctx context.Context, token *models.RefreshToken) error
+	GetRefreshTokenByHash(ctx context.Context, tokenHash string) (*models.RefreshToken, error)
+	RevokeRefreshToken(ctx context.Context, tokenHash string) error
+	RevokeAllUserTokens(ctx context.Context, userID uuid.UUID) error
+	DeleteExpiredTokens(ctx context.Context) error
 }
 
 type repository struct {
