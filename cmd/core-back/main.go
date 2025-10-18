@@ -33,5 +33,5 @@ func main() {
 
 	h := handler.NewHandler(svc)
 
-	server.NewServer(h).Run(cfg.ServerPort)
+	server.NewServer(h, svc).Run(cfg.ServerPort)
 }
