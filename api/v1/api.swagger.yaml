@@ -139,20 +139,19 @@ paths:
                 error: Username or email already taken
                 statusCode: 409
 
-  /members/boards/{idBoard}/join:
+  /members/boards/{nameBoardUnique}/join:
     post:
       tags:
         - Members
       summary: Join a board
-      description: Join an existing board using board ID and password
+      description: Join an existing board using board unique name and password
       parameters:
-        - name: idBoard
+        - name: nameBoardUnique
           in: path
           required: true
           schema:
             type: string
-            format: uuid
-          description: Board unique identifier
+          description: Board unique name (name_board_unique)
       requestBody:
         required: true
         content:
@@ -651,6 +650,10 @@ components:
         name:
           type: string
           example: My Project Board
+        name_board_unique:
+          type: string
+          example: my-project-board-2024
+          description: Unique identifier name for the board
         description:
           type: string
           example: Board for managing project tasks
@@ -676,6 +679,9 @@ components:
           format: uuid
         name:
           type: string
+        name_board_unique:
+          type: string
+          description: Unique identifier name for the board
         description:
           type: string
         starred:
@@ -852,6 +858,7 @@ components:
       type: object
       required:
         - name
+        - name_board_unique
         - password
       properties:
         name:
@@ -859,6 +866,13 @@ components:
           minLength: 1
           maxLength: 100
           example: My Project Board
+        name_board_unique:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-z0-9-]+$'
+          example: my-project-board-2024
+          description: Unique identifier name for the board (lowercase letters, numbers, and hyphens only)
         description:
           type: string
           maxLength: 500
@@ -875,6 +889,12 @@ components:
           type: string
           minLength: 1
           maxLength: 100
+        name_board_unique:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-z0-9-]+$'
+          description: Update unique identifier name for the board (lowercase letters, numbers, and hyphens only)
         description:
           type: string
           maxLength: 500
