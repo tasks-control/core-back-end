@@ -4,7 +4,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/tasks-control/core-back-end/internal/config"
 	"github.com/tasks-control/core-back-end/internal/handler"
+	"github.com/tasks-control/core-back-end/internal/repository"
 	"github.com/tasks-control/core-back-end/internal/server"
+	"github.com/tasks-control/core-back-end/internal/service"
 	"github.com/tasks-control/core-back-end/pkg/utils"
 )
 
@@ -19,7 +21,13 @@ func main() {
 		"config": cfg,
 	}).Debug("Config")
 
-	h := handler.NewHandler(nil)
+	repo, err := repository.New(cfg.Database)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	svc := service.New(repo)
+	h := handler.NewHandler(svc)
 
 	server.NewServer(h).Run(cfg.ServerPort)
 }

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/tasks-control/core-back-end/internal/repository"
+
 	"github.com/go-playground/validator/v10"
 
 	"github.com/tasks-control/core-back-end/pkg/utils"
@@ -12,7 +14,8 @@ import (
 )
 
 type Config struct {
-	ServerPort string `validate:"required" yaml:"serverPort"`
+	ServerPort string            `validate:"required" yaml:"serverPort"`
+	Database   repository.Config `validate:"required" yaml:"database"`
 }
 
 func GetConfig() (cfg *Config) {
