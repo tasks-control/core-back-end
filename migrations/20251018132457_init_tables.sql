@@ -64,7 +64,7 @@ CREATE TABLE board_members (
         ON DELETE CASCADE,
     
     CONSTRAINT chk_board_members_role 
-        CHECK (role IN ('owner', 'member')),
+        CHECK (role IN ('owner', 'member', 'moderator')),
     
     CONSTRAINT uq_board_member 
         UNIQUE (id_board, id_member)
