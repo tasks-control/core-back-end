@@ -27,6 +27,7 @@ type Repository interface {
 	TokenRepository
 	BoardRepository
 	ListRepository
+	CardRepository
 }
 
 type MemberRepository interface {
@@ -70,6 +71,17 @@ type ListRepository interface {
 	GetListCards(ctx context.Context, listID uuid.UUID) ([]*models.Card, error)
 	GetMaxListPosition(ctx context.Context, boardID uuid.UUID) (float64, error)
 	GetListCountInBoard(ctx context.Context, boardID uuid.UUID) (int, error)
+}
+
+type CardRepository interface {
+	CreateCard(ctx context.Context, card *models.Card) error
+	GetCardByID(ctx context.Context, cardID uuid.UUID) (*models.Card, error)
+	UpdateCard(ctx context.Context, card *models.Card) error
+	DeleteCard(ctx context.Context, cardID uuid.UUID) error
+	GetMaxCardPosition(ctx context.Context, listID uuid.UUID) (float64, error)
+	GetCardCountInList(ctx context.Context, listID uuid.UUID) (int, error)
+	GetBoardIDByCardID(ctx context.Context, cardID uuid.UUID) (uuid.UUID, error)
+	GetBoardIDByListID(ctx context.Context, listID uuid.UUID) (uuid.UUID, error)
 }
 
 type repository struct {

@@ -53,11 +53,11 @@
 - [x] Add fractional indexing logic for list positioning
 
 ## Cards API
-- [ ] Implement POST /cards (create card in list)
-- [ ] Implement GET /cards/{idCard} (get card details)
-- [ ] Implement PUT /cards/{idCard} (update card, move between lists)
-- [ ] Implement DELETE /cards/{idCard} (delete card)
-- [ ] Add fractional indexing logic for card positioning
+- [x] Implement POST /cards (create card in list)
+- [x] Implement GET /cards/{idCard} (get card details)
+- [x] Implement PUT /cards/{idCard} (update card, move between lists)
+- [x] Implement DELETE /cards/{idCard} (delete card)
+- [x] Add fractional indexing logic for card positioning
 
 ## Business Logic & Validation
 - [x] Implement board membership check (access control)
