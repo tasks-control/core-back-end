@@ -26,6 +26,7 @@ type Repository interface {
 	MemberRepository
 	TokenRepository
 	BoardRepository
+	ListRepository
 }
 
 type MemberRepository interface {
@@ -59,6 +60,16 @@ type BoardRepository interface {
 	UnstarBoard(ctx context.Context, boardID, memberID uuid.UUID) error
 	IsStarred(ctx context.Context, boardID, memberID uuid.UUID) (bool, error)
 	GetBoardLists(ctx context.Context, boardID uuid.UUID) ([]*models.List, error)
+}
+
+type ListRepository interface {
+	CreateList(ctx context.Context, list *models.List) error
+	GetListByID(ctx context.Context, listID uuid.UUID) (*models.List, error)
+	UpdateList(ctx context.Context, list *models.List) error
+	DeleteList(ctx context.Context, listID uuid.UUID) error
+	GetListCards(ctx context.Context, listID uuid.UUID) ([]*models.Card, error)
+	GetMaxListPosition(ctx context.Context, boardID uuid.UUID) (float64, error)
+	GetListCountInBoard(ctx context.Context, boardID uuid.UUID) (int, error)
 }
 
 type repository struct {

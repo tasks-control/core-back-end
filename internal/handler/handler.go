@@ -45,23 +45,3 @@ func (h *Handler) PutCardsIdCard(w http.ResponseWriter, r *http.Request, idCard 
 	//TODO implement me
 	w.WriteHeader(http.StatusNotImplemented)
 }
-
-func (h *Handler) PostLists(w http.ResponseWriter, r *http.Request, params v1.PostListsParams) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) DeleteListsIdList(w http.ResponseWriter, r *http.Request, idList openapi_types.UUID) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) GetListsIdList(w http.ResponseWriter, r *http.Request, idList openapi_types.UUID) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) PutListsIdList(w http.ResponseWriter, r *http.Request, idList openapi_types.UUID) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
