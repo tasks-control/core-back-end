@@ -46,11 +46,11 @@
 - [x] Ensure name_board_unique uniqueness across all boards
 
 ## Lists API
-- [ ] Implement POST /lists (create list with fractional indexing)
-- [ ] Implement GET /lists/{idList} (get list with cards)
-- [ ] Implement PUT /lists/{idList} (update list name, position, archived status)
-- [ ] Implement DELETE /lists/{idList} (delete list and cascade delete)
-- [ ] Add fractional indexing logic for list positioning
+- [x] Implement POST /lists (create list with fractional indexing)
+- [x] Implement GET /lists/{idList} (get list with cards)
+- [x] Implement PUT /lists/{idList} (update list name, position, archived status)
+- [x] Implement DELETE /lists/{idList} (delete list and cascade delete)
+- [x] Add fractional indexing logic for list positioning
 
 ## Cards API
 - [ ] Implement POST /cards (create card in list)
