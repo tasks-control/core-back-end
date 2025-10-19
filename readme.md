@@ -29,21 +29,21 @@
 ## Members API
 - [ ] Implement GET /members/me (get current user info)
 - [ ] Implement PUT /members/me (update user profile)
-- [ ] Implement POST /members/boards/{nameBoardUnique}/join (join board by unique name)
-- [ ] Implement POST /members/boards/{idBoard}/star (star board)
-- [ ] Implement DELETE /members/boards/{idBoard}/star (unstar board)
+- [x] Implement POST /members/boards/{nameBoardUnique}/join (join board by unique name)
+- [x] Implement POST /members/boards/{idBoard}/star (star board)
+- [x] Implement DELETE /members/boards/{idBoard}/star (unstar board)
 - [ ] Add validation for username/email uniqueness
 
 ## Boards API
-- [ ] Implement GET /boards (list user's boards with filters)
-- [ ] Implement POST /boards (create board with unique name validation)
-- [ ] Implement GET /boards/{idBoard} (get board with lists and members)
-- [ ] Implement PUT /boards/{idBoard} (update board, including name_board_unique)
-- [ ] Implement DELETE /boards/{idBoard} (delete board and cascade delete)
-- [ ] Implement DELETE /boards/{idBoard}/members/{idMember} (remove member/leave board)
-- [ ] Add board password validation logic
-- [ ] Validate name_board_unique format (lowercase, numbers, hyphens only)
-- [ ] Ensure name_board_unique uniqueness across all boards
+- [x] Implement GET /boards (list user's boards with filters)
+- [x] Implement POST /boards (create board with unique name validation)
+- [x] Implement GET /boards/{idBoard} (get board with lists and members)
+- [x] Implement PUT /boards/{idBoard} (update board, including name_board_unique)
+- [x] Implement DELETE /boards/{idBoard} (delete board and cascade delete)
+- [x] Implement DELETE /boards/{idBoard}/members/{idMember} (remove member/leave board)
+- [x] Add board password validation logic
+- [x] Validate name_board_unique format (lowercase, numbers, hyphens only)
+- [x] Ensure name_board_unique uniqueness across all boards
 
 ## Lists API
 - [ ] Implement POST /lists (create list with fractional indexing)
@@ -60,11 +60,11 @@
 - [ ] Add fractional indexing logic for card positioning
 
 ## Business Logic & Validation
-- [ ] Implement board membership check (access control)
-- [ ] Implement board ownership check (admin operations)
-- [ ] Add validation for already joined boards (409 conflict)
-- [ ] Add pagination support (limit/offset)
-- [ ] Implement starred boards filtering
+- [x] Implement board membership check (access control)
+- [x] Implement board ownership check (admin operations)
+- [x] Add validation for already joined boards (409 conflict)
+- [x] Add pagination support (limit/offset)
+- [x] Implement starred boards filtering
 - [ ] Add archived lists/cards filtering logic
 
 ## Testing
