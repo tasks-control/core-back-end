@@ -36,6 +36,6 @@ COPY --from=builder /app/cmd/core-back/config.yaml ./config.yaml
 # Expose the application port
 EXPOSE 8080
 
-# Run the application
-CMD ["./main"]
+# Run the application with config path flag
+CMD ["./main", "-c", "./config.yaml"]
 
