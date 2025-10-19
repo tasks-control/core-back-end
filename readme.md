@@ -27,12 +27,12 @@
 - [x] Implement password hashing (bcrypt)
 
 ## Members API
-- [ ] Implement GET /members/me (get current user info)
-- [ ] Implement PUT /members/me (update user profile)
+- [x] Implement GET /members/me (get current user info)
+- [x] Implement PUT /members/me (update user profile)
 - [x] Implement POST /members/boards/{nameBoardUnique}/join (join board by unique name)
 - [x] Implement POST /members/boards/{idBoard}/star (star board)
 - [x] Implement DELETE /members/boards/{idBoard}/star (unstar board)
-- [ ] Add validation for username/email uniqueness
+- [x] Add validation for username/email uniqueness
 
 ## Boards API
 - [x] Implement GET /boards (list user's boards with filters)
