@@ -8,6 +8,8 @@ import (
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	v1 "github.com/tasks-control/core-back-end/api/v1"
+	"github.com/tasks-control/core-back-end/internal/middleware"
+	"github.com/tasks-control/core-back-end/internal/service"
 	"github.com/tasks-control/core-back-end/pkg/utils"
 )
 
@@ -23,10 +25,14 @@ type HealthHandlers interface {
 type Server struct {
 	httpServer *http.Server
 	handlers   HTTPHandlers
+	service    *service.Service
 }
 
-func NewServer(handlers HTTPHandlers) *Server {
-	return &Server{handlers: handlers}
+func NewServer(handlers HTTPHandlers, svc *service.Service) *Server {
+	return &Server{
+		handlers: handlers,
+		service:  svc,
+	}
 }
 
 func (s *Server) Run(port string) {
@@ -43,8 +49,13 @@ func (s *Server) Run(port string) {
 	r.Use(chimiddleware.SetHeader("Content-Type", "application/json"))
 	r.Use(cors.Handler(corsOpts))
 
+	// Create auth middleware
+	authMiddleware := middleware.NewAuthMiddleware(s.service)
+
 	r.Route("/api/core-back-end/v1", func(router chi.Router) {
-		//router.Use(middleware.GetAPIKeyMiddleware(s.gristService, s.cookieKey))
+		// Apply authentication middleware to all routes
+		// Public endpoints will be skipped inside the middleware
+		router.Use(authMiddleware.Authenticate)
 		router.Mount("/", v1.Handler(s.handlers))
 	})
 

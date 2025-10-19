@@ -8,23 +8,23 @@
 - [x] Design database schema (members, boards, lists, cards, board_members, starred_boards)
 - [x] Add unique index for `name_board_unique` field in boards table
 - [x] Create database migrations
-- [ ] Set up database connection pool and configuration
+- [x] Set up database connection pool and configuration
 
 ## Project Structure
-- [ ] Set up Go project structure (handlers, services, repositories, models)
-- [ ] Configure dependencies
-- [ ] Set up configuration management (YAML/ENV)
-- [ ] Add logging middleware and error handling
-- [ ] Set up CORS and security middleware
+- [x] Set up Go project structure (handlers, services, repositories, models)
+- [x] Configure dependencies
+- [x] Set up configuration management (YAML/ENV)
+- [x] Add logging middleware and error handling
+- [x] Set up CORS and security middleware
 
 ## Authentication & Authorization
-- [ ] Implement JWT token generation and validation
-- [ ] Create access token and refresh token logic
-- [ ] Implement user registration endpoint
-- [ ] Implement user login endpoint
-- [ ] Implement token refresh endpoint
-- [ ] Add authentication middleware for protected routes
-- [ ] Implement password hashing (bcrypt)
+- [x] Implement JWT token generation and validation
+- [x] Create access token and refresh token logic
+- [x] Implement user registration endpoint
+- [x] Implement user login endpoint
+- [x] Implement token refresh endpoint
+- [x] Add authentication middleware for protected routes
+- [x] Implement password hashing (bcrypt)
 
 ## Members API
 - [ ] Implement GET /members/me (get current user info)
@@ -77,9 +77,9 @@
 ## Deployment & DevOps
 - [ ] Create Dockerfile
 - [ ] Set up CI/CD pipeline
-- [ ] Configure production database
-- [ ] Set up environment-specific configs
-- [ ] Add health check endpoint
+- [x] Configure production database
+- [x] Set up environment-specific configs
+- [x] Add health check endpoint
 
 ## Cascade relations scheme (mermaid)
 ```mermaid

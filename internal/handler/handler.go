@@ -3,12 +3,18 @@ package handler
 import (
 	"net/http"
 
+	"github.com/tasks-control/core-back-end/internal/service"
+
 	openapi_types "github.com/oapi-codegen/runtime/types"
 	v1 "github.com/tasks-control/core-back-end/api/v1"
 )
 
 type Handler struct {
-	Service any
+	Service *service.Service
+}
+
+func NewHandler(s *service.Service) *Handler {
+	return &Handler{Service: s}
 }
 
 func (h *Handler) GetAlive(w http.ResponseWriter, r *http.Request) {
@@ -16,21 +22,6 @@ func (h *Handler) GetAlive(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Readiness(w http.ResponseWriter, r *http.Request) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) PostAuthLogin(w http.ResponseWriter, r *http.Request) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) PostAuthRefresh(w http.ResponseWriter, r *http.Request) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) PostAuthRegister(w http.ResponseWriter, r *http.Request) {
 	//TODO implement me
 	w.WriteHeader(http.StatusNotImplemented)
 }
@@ -128,8 +119,4 @@ func (h *Handler) GetMembersMe(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) PutMembersMe(w http.ResponseWriter, r *http.Request) {
 	//TODO implement me
 	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func NewHandler(s any) *Handler {
-	return &Handler{Service: s}
 }
