@@ -56,6 +56,7 @@ setup: docker-up
 	@sleep 5
 	@make migrate
 	@echo "✅ Setup complete! Database is ready."
+	@echo "📊 Application available at: http://localhost:8080"
 	@echo "📊 pgAdmin available at: http://localhost:5050"
 	@echo "   Email: admin@admin.com"
 	@echo "   Password: admin"

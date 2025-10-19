@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yaml
+.dockerignore
+
+# Documentation
+*.md
+readme.md
+
+# IDE
+.vscode
+.idea
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+
+# Volumes
+postgres_data
+pgadmin_data
+
