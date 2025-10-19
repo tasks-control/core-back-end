@@ -26,36 +26,6 @@ func (h *Handler) Readiness(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-func (h *Handler) GetBoards(w http.ResponseWriter, r *http.Request, params v1.GetBoardsParams) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) PostBoards(w http.ResponseWriter, r *http.Request) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) DeleteBoardsIdBoard(w http.ResponseWriter, r *http.Request, idBoard openapi_types.UUID) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) GetBoardsIdBoard(w http.ResponseWriter, r *http.Request, idBoard openapi_types.UUID) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) PutBoardsIdBoard(w http.ResponseWriter, r *http.Request, idBoard openapi_types.UUID) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) DeleteBoardsIdBoardMembersIdMember(w http.ResponseWriter, r *http.Request, idBoard openapi_types.UUID, idMember openapi_types.UUID) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
 func (h *Handler) PostCards(w http.ResponseWriter, r *http.Request, params v1.PostCardsParams) {
 	//TODO implement me
 	w.WriteHeader(http.StatusNotImplemented)
@@ -92,21 +62,6 @@ func (h *Handler) GetListsIdList(w http.ResponseWriter, r *http.Request, idList 
 }
 
 func (h *Handler) PutListsIdList(w http.ResponseWriter, r *http.Request, idList openapi_types.UUID) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) DeleteMembersBoardsIdBoardStar(w http.ResponseWriter, r *http.Request, idBoard openapi_types.UUID) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) PostMembersBoardsIdBoardStar(w http.ResponseWriter, r *http.Request, idBoard openapi_types.UUID) {
-	//TODO implement me
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (h *Handler) PostMembersBoardsNameBoardUniqueJoin(w http.ResponseWriter, r *http.Request, nameBoardUnique string) {
 	//TODO implement me
 	w.WriteHeader(http.StatusNotImplemented)
 }

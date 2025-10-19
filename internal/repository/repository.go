@@ -25,6 +25,7 @@ type Config struct {
 type Repository interface {
 	MemberRepository
 	TokenRepository
+	BoardRepository
 }
 
 type MemberRepository interface {
@@ -41,6 +42,23 @@ type TokenRepository interface {
 	RevokeRefreshToken(ctx context.Context, tokenHash string) error
 	RevokeAllUserTokens(ctx context.Context, userID uuid.UUID) error
 	DeleteExpiredTokens(ctx context.Context) error
+}
+
+type BoardRepository interface {
+	CreateBoard(ctx context.Context, board *models.Board) error
+	GetBoardByID(ctx context.Context, boardID uuid.UUID) (*models.Board, error)
+	GetBoardByUniqueName(ctx context.Context, uniqueName string) (*models.Board, error)
+	GetBoardsByMemberID(ctx context.Context, memberID uuid.UUID, starredOnly bool, limit, offset int) ([]*models.Board, int, error)
+	UpdateBoard(ctx context.Context, board *models.Board) error
+	DeleteBoard(ctx context.Context, boardID uuid.UUID) error
+	GetBoardMember(ctx context.Context, boardID, memberID uuid.UUID) (*models.BoardMember, error)
+	AddBoardMember(ctx context.Context, boardMember *models.BoardMember) error
+	RemoveBoardMember(ctx context.Context, boardID, memberID uuid.UUID) error
+	GetBoardMembers(ctx context.Context, boardID uuid.UUID) ([]*models.Member, error)
+	StarBoard(ctx context.Context, boardID, memberID uuid.UUID) error
+	UnstarBoard(ctx context.Context, boardID, memberID uuid.UUID) error
+	IsStarred(ctx context.Context, boardID, memberID uuid.UUID) (bool, error)
+	GetBoardLists(ctx context.Context, boardID uuid.UUID) ([]*models.List, error)
 }
 
 type repository struct {
